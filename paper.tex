@@ -1,0 +1,310 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{ctex}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{graphicx}
+\graphicspath{{./}}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead[L]{\small 有限溫度場論數值計算入門}
+\fancyhead[R]{\small 吳浩源 \& DeepSeek}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{enumitem}
+
+% footnote style
+\usepackage[bottom]{footmisc}
+
+\title{\vspace{-2em}\textbf{有限溫度場論的數值計算入門}\\
+\large 從松原和到譜函數——$\phi^4$ 理論的 Python 實現}
+\author{吳浩源\footnote{清華大學物理系} \qquad
+        \texttt{DeepSeek}\footnote{生成式 AI 輔助寫作與程式設計}}
+\date{2026 年 5 月}
+
+\begin{document}
+\maketitle
+\vspace{-1em}
+
+\begin{abstract}
+本文以 $\phi^4$ 標量場為例，展示如何從有限溫場論的松原形式出發，透過數值計算得到熱質量與譜函數。
+我們詳細記錄從解析推導到 Python 實現的完整過程，並將結果與高溫極限進行比較。
+文中所有程式碼均收錄於 GitHub 倉庫 \texttt{hy-wu/qft\_coding}。
+\end{abstract}
+
+\section{引言}
+
+量子場論在高溫下的行為是夸克-膠子等離子體（QGP）唯象學的理論基礎。
+有限溫場論的核心工具之一是松原（Matsubara）形式——
+將溫度引入場論的途徑是將時間方向緊緻化為半徑 $\beta = 1/T$ 的圓，
+粒子的統計性質則體現在松原頻率的離散求和當中\footnote{詳細介紹見文獻~[1]~第~3~章、[2]~第~2~章、[3]~第~1~章。}。
+
+然而，絕大多數教科書的推導止於解析結果的封閉形式。
+對於實際的 QGP 研究——例如計算重夸克擴散係數、夸克偶素的譜函數——
+我們最終需要\textbf{數值地}做松原和、動量積分和解析延拓。
+本文的目的是填補「課本公式」與「可執行代碼」之間的 gap。
+
+我們選擇最簡單的 $\phi^4$ 理論作為 playground，因為：
+\begin{itemize}[nosep]
+\item 單圈計算可解析做，方便與數值結果交叉驗證；
+\item 譜函數的溫度展寬類比於 QGP 中的夸克偶素溶解；
+\item 計算代價低，普通筆記型電腦即可在數秒內完成。
+\end{itemize}
+
+\section{有限溫標量場論基礎}
+
+\subsection{松原形式}
+
+在有限溫度 $T$ 下，場論的配分函數可寫為虛時路徑積分：
+\begin{equation}
+Z = \int \mathcal{D}\phi \; \exp\left[-\int_0^\beta d\tau \int d^3\mathbf{x}\; \mathcal{L}_E\right],
+\label{eq:path-integral}
+\end{equation}
+其中 $\beta = 1/T$，歐幾里得拉氏量為
+\begin{equation}
+\mathcal{L}_E = \frac{1}{2}(\partial_\tau\phi)^2 + \frac{1}{2}(\nabla\phi)^2 + \frac{1}{2}m_0^2\phi^2 + \frac{\lambda}{4!}\phi^4.
+\label{eq:lagrangian}
+\end{equation}
+場 $\phi(\tau, \mathbf{x})$ 在虛時方向上滿足（玻色子的）週期邊界條件：
+$\phi(0, \mathbf{x}) = \phi(\beta, \mathbf{x})$\footnote{費米子對應反週期邊界條件。}。
+
+對 $(\ref{eq:path-integral})$ 做微擾展開，自由傳播子在松原頻率空間中為
+\begin{equation}
+\Delta(i\omega_n, \mathbf{k}) = \frac{1}{\omega_n^2 + \mathbf{k}^2 + m_0^2},
+\label{eq:propagator}
+\end{equation}
+其中 $\omega_n = 2\pi n T$（$n \in \mathbb{Z}$）是玻色子的松原頻率。
+
+\subsection{Tadpole 自能}
+
+在 $\phi^4$ 理論中，二點函數的單圈修正由 tadpole 圖給出：
+\begin{equation}
+\Pi = \frac{\lambda}{2}\; T\sum_{n=-\infty}^{\infty} \int \frac{d^3\mathbf{k}}{(2\pi)^3}\; \Delta(i\omega_n, \mathbf{k}).
+\label{eq:tadpole}
+\end{equation}
+這裡的因子 $1/2$ 來自對稱因子，$T\sum_n$ 是松原和。
+
+松原和是解析可做的。利用標準技巧\footnote{見~[1]~附錄~A 或~[3]~第~2.2~節。}：
+\begin{equation}
+T\sum_{n=-\infty}^{\infty} \frac{1}{\omega_n^2 + E_{\mathbf{k}}^2}
+= \frac{1}{2E_{\mathbf{k}}}\bigl[1 + 2n_B(E_{\mathbf{k}})\bigr],
+\label{eq:matsubara-sum}
+\end{equation}
+其中 $E_{\mathbf{k}} = \sqrt{\mathbf{k}^2 + m_0^2}$，$n_B(E) = 1/(e^{\beta E} - 1)$
+為玻色-愛因斯坦分佈。
+
+將 (\ref{eq:matsubara-sum}) 代入 (\ref{eq:tadpole})，自能分解為零溫真空部分和溫度部分：
+\begin{equation}
+\Pi = \Pi_{T=0} + \Pi_{\text{th}}(T).
+\label{eq:pi-split}
+\end{equation}
+真空部分是發散的，需要在重整化過程中減除。
+溫度部分是有限的，其表達式為
+\begin{equation}
+\Pi_{\text{th}}(T) = \frac{\lambda}{2} \int \frac{d^3\mathbf{k}}{(2\pi)^3}\; \frac{n_B(E_{\mathbf{k}})}{E_{\mathbf{k}}}.
+\label{eq:pi-th}
+\end{equation}
+這就是我們將要數值計算的目標——它正是熱質量 $m_{\text{th}}^2(T)$ 的來源。
+
+\section{練習一：熱質量的數值計算}
+
+\subsection{從解析推導到數值積分}
+
+將 (\ref{eq:pi-th}) 寫為球坐標形式：
+\begin{equation}
+\Pi_{\text{th}}(T) = \frac{\lambda}{4\pi^2} \int_0^{\infty} dk\; k^2\; \frac{n_B(E_k)}{E_k},
+\label{eq:pi-th-spherical}
+\end{equation}
+其中 $E_k = \sqrt{k^2 + m_0^2}$。
+
+這是個一維積分，適用高斯求積。積分核隨 $k$ 的衰減由 $n_B(E_k)$ 控制：
+在 $k \gg T$ 時，$n_B \sim e^{-k/T}$，故截斷到 $k_{\max} \sim 20T$ 已足夠精確。
+
+\subsection{Python 實現}
+
+對應的程式碼在 \texttt{01\_tadpole\_thermal\_mass.py} 中\footnote{全文見 GitHub: \url{https://github.com/hy-wu/qft_coding}。}。
+
+核心是玻色-愛因斯坦分佈函數：
+\begin{verbatim}
+def bose_einstein(E, T):
+    if T <= 0:  return 0.0
+    if E / T > 100:  return 0.0  # avoid overflow
+    return 1.0 / (np.exp(E / T) - 1.0)
+\end{verbatim}
+注意 \texttt{exp(E/T)} 在 $E/T > 100$ 時超出雙精度浮點範圍，需提前截斷。
+
+被積函數與數值積分：
+\begin{verbatim}
+def tadpole_integrand(k, T):
+    Ek = np.sqrt(k**2 + M0**2)
+    return 4.0 * np.pi * k**2 * bose_einstein(Ek, T) / Ek
+
+def thermal_self_energy(T):
+    cutoff = max(20.0 * T, 10.0)
+    result, _ = integrate.quad(tadpole_integrand, 0, cutoff,
+                                args=(T,))
+    return LAMBDA / 2.0 * result / (2 * np.pi)**3
+\end{verbatim}
+\texttt{integrate.quad} 是 SciPy 的自適應高斯求積，它負責處理積分核在 $k \to 0$ 時的潛在奇異性。
+
+\subsection{高溫極限}
+
+當 $T \gg m_0$ 時，可以忽略質量並解析算出 (\ref{eq:pi-th})：
+\begin{equation}
+m_{\text{th}}^2(T) \equiv \Pi_{\text{th}}(T) \;\xrightarrow{T \gg m_0}\; \frac{\lambda T^2}{24}.
+\label{eq:ht-limit}
+\end{equation}
+這是有限溫場論中最經典的結果之一——標量場在高溫下獲得與 $T^2$ 成正比的熱質量。
+在 QCD 中，對應的是德拜質量 $m_D \sim gT$\footnote{見~[1]~第~5.5~節或~[3]~第~4.3~節。}。
+
+\subsection{結果}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{01_thermal_mass.png}
+\caption{左：$\Pi_{\text{th}}(T)$ 的數值結果與高溫極限 $\lambda T^2/24$ 的比較（對數坐標）。
+右：數值結果與高溫極限的比值，顯示在 $T/m_0 > 30$ 時偏差小於 $0.5\%$。}
+\label{fig:thermal-mass}
+\end{figure}
+
+圖~\ref{fig:thermal-mass} 展示結果。在 $T/m_0 \lesssim 10$ 的低溫區，由於零溫質量 $m_0$ 的影響，熱質量明顯偏離 $\lambda T^2/24$。
+到了 $T/m_0 \approx 30$，比值達到 $0.997$，驗證了高溫極限的正確性。
+
+\section{練習二：譜函數與溫度展寬}
+
+熱質量只是故事的一半。在 QGP 中，粒子不僅獲得有效質量，還因與熱浴的碰撞而具有有限壽命，表現為譜函數的展寬。
+這正是夸克偶素在 QGP 中「溶解」的微觀機制\footnote{詳見~[4]~以及~[5]。}。
+
+\subsection{推遲傳播子與譜函數}
+
+推遲傳播子的定義為\footnote{見~[1]~第~3.4~節或~[3]~第~2.4~節。}
+\begin{equation}
+D_R(\omega, \mathbf{p}) = \frac{1}{-\omega^2 + \mathbf{p}^2 + m_0^2 + \Pi_R(\omega, \mathbf{p})},
+\label{eq:retarded}
+\end{equation}
+其中 $\Pi_R$ 是推遲自能。譜函數則為
+\begin{equation}
+\rho(\omega, \mathbf{p}) = -\frac{1}{\pi}\, \operatorname{Im} D_R(\omega, \mathbf{p}).
+\label{eq:spectral}
+\end{equation}
+在自由粒子極限下，$\rho(\omega, \mathbf{p}) = \operatorname{sgn}(\omega)\,\delta(-\omega^2 + \mathbf{p}^2 + m_0^2)$。
+
+\subsection{熱寬度的唯象引入}
+
+在 $\phi^4$ 理論的高溫極限，$2 \to 2$ 散射過程賦予準粒子一個衰變寬度\footnote{見~[6]~以及~[7]~中有關標量場阻尼率的討論。}：
+\begin{equation}
+\Gamma(T) \sim \frac{\lambda^2 T}{4\pi}.
+\label{eq:width}
+\end{equation}
+在準粒子極限附近，自能可近似為
+\begin{equation}
+\Pi_R(\omega, \mathbf{p}) \approx m_{\text{th}}^2(T) - i\omega\Gamma(T).
+\label{eq:self-energy-approx}
+\end{equation}
+代入 (\ref{eq:retarded})-(\ref{eq:spectral}) 即得 Breit-Wigner 形式的譜函數：
+\begin{equation}
+\rho(\omega, \mathbf{p}) = \frac{1}{\pi}\,
+\frac{\omega\Gamma}{(\omega^2 - \omega_{\mathbf{p}}^2)^2 + (\omega\Gamma)^2},
+\label{eq:breit-wigner}
+\end{equation}
+其中 $\omega_{\mathbf{p}}^2 = \mathbf{p}^2 + m_0^2 + m_{\text{th}}^2(T)$。
+
+\subsection{數值結果}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{02_spectral_function_T.png}
+\caption{零動量譜函數隨溫度的演化。低溫下峰值接近 $\delta$ 函數，隨著 $T$ 增加，
+峰值向右偏移（熱質量效應）並顯著展寬（熱寬度效應）。}
+\label{fig:spec-T}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{02_spectral_function_p.png}
+\caption{固定溫度 $T=2$ 下不同動量的譜函數。動量越大，準粒子能量越高，峰值越寬。}
+\label{fig:spec-p}
+\end{figure}
+
+圖~\ref{fig:spec-T} 和~\ref{fig:spec-p} 展示了譜函數的兩個關鍵特徵：
+\begin{enumerate}[nosep]
+\item \textbf{熱質量效應}：峰值位置 $\omega_{\mathbf{p}}$ 隨 $T$ 增加而增加，反映 $m_{\text{th}}^2 \propto T^2$；
+\item \textbf{熱展寬效應}：峰值半高寬 $\Gamma$ 隨 $T$ 線性增加，反映 $\Gamma \propto \lambda^2 T$。
+\end{enumerate}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{02_peak_T_dependence.png}
+\caption{峰值位置 $\omega_p$（左）和展寬 $\Gamma$（右）對溫度的依賴。
+$\omega_p$ 在高溫下趨於 $\sim \sqrt{\lambda/24}\,T$，$\Gamma$ 則呈線性增長。}
+\label{fig:peak-T}
+\end{figure}
+
+\section{與 QGP 唯象的聯繫}
+
+以上練習雖在標量理論中進行，其物理圖像直接推廣到 QGP：
+
+\begin{itemize}[nosep]
+\item \textbf{德拜屏蔽}：QCD 中膠子的熱質量（德拜質量）$m_D^2 = g^2T^2(N_c/3 + N_f/6)$\footnote{見~[1]~第~5.5~節、[3]~第~4.3~節。}。
+這控制了誇克-膠子等離子體中色電荷的屏蔽長度 $\lambda_D = 1/m_D$。
+
+\item \textbf{夸克偶素溶解}：$J/\psi$ 和 $\Upsilon$ 在 QGP 中的譜函數與我們計算的標量譜函數定性類似。
+當溫度超過某個閾值，束縛態譜峰的展寬超過束縛能，粒子「溶解」\footnote{見~[4]~以及 LHC 上 ALICE、CMS 合作的相關實驗報告。}。
+這是 QGP 存在的關鍵實驗信號之一。
+
+\item \textbf{重夸克擴散}：重夸克（粲、底）在 QGP 中的動量擴散係數 $\kappa$，
+可透過重夸克譜函數的零能極限提取：$\kappa = \lim_{\omega\to0} 2T\rho(\omega, \mathbf{0})/\omega$\footnote{見~[8]~中有關 $q̂$ 與 $\kappa$ 的詳細討論。}。
+這正是下一步練習的主題。
+\end{itemize}
+
+\section{總結}
+
+本文展示了從有限溫場論的基本公式出發，透過約 80 行 Python 程式碼，
+即可完成從松原和到譜函數的完整計算。主要收穫：
+
+\begin{enumerate}[nosep]
+\item 有限溫度的微擾計算可自然地拆解為「解析推導」和「數值積分」兩步；
+\item 熱質量 $m_{\text{th}}^2$ 的數值結果在高溫下精確趨近 $\lambda T^2/24$；
+\item 譜函數從自由 $\delta$ 函數演化為高溫下的 Breit-Wigner 形式，
+反映了準粒子在熱浴中獲得有效質量與有限壽命的物理圖像；
+\item 以上所有結果均直接類比於 QGP 的德拜屏蔽與夸克偶素溶解。
+\end{enumerate}
+
+\begin{thebibliography}{99}
+\footnotesize
+\bibitem{kapusta} J.~I.~Kapusta and C.~Gale,
+\textit{Finite-Temperature Field Theory: Principles and Applications},
+2nd ed. (Cambridge University Press, 2006).
+
+\bibitem{laine} M.~Laine and A.~Vuorinen,
+\textit{Basics of Thermal Field Theory},
+Lect. Notes Phys. 925 (Springer, 2016).
+
+\bibitem{lebellac} M.~Le~Bellac,
+\textit{Thermal Field Theory} (Cambridge University Press, 1996).
+
+\bibitem{mocsy} A.~Mócsy, P.~Petreczky, and M.~Strickland,
+Quarkonium in medium: From correlation functions to PDFs,
+\textit{Int. J. Mod. Phys. A} 28, 1340012 (2013).
+
+\bibitem{rapps} R.~Rapp and H.~van~Hees,
+Heavy quarks in the quark-gluon plasma, in
+\textit{Quark-Gluon Plasma 4}, ed. R.~C.~Hwa and X.-N.~Wang
+(World Scientific, 2010).
+
+\bibitem{jeon} S.~Jeon,
+Computing spectral densities in finite temperature field theory,
+\textit{Phys. Rev. D} 47, 4586 (1993).
+
+\bibitem{arnold} P.~Arnold, D.~T.~Son, and L.~G.~Yaffe,
+Effective dynamics of hot, soft non-Abelian gauge fields,
+\textit{Phys. Rev. D} 55, 6264 (1997).
+
+\bibitem{majumder} A.~Majumder and M.~Van~Leeuwen,
+The theory and phenomenology of perturbative QCD based jet quenching,
+\textit{Prog. Part. Nucl. Phys.} 66, 41 (2011).
+\end{thebibliography}
+
+\end{document}
