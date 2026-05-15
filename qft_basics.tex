@@ -383,7 +383,110 @@ $
 $\bigotimes_{\mathbf{k}}$（模式 $\mathbf{k}$ 的 $\mathbb{C}^\infty$）的张量积空间
 \end{enumerate}
 
-下一步（Phase 1.1）：用 Python 数值解耦合 QHO 链，
-亲眼看到色散关系 $\omega_k$ 从小 $k$ 的线性 $\sim |k|$ 到大 $k$ 的饱和。
+\subsection{从单模式到格点：$\phi^4$ 场论的数值实现}
+
+以上我们从单个非谐振子出发，得到了 tadpole 图的解析结果。
+现在把它推广到 $N$ 个耦合谐振子——这\textbf{就是}格点 $\phi^4$ 场论。
+
+在 $N$ 个格点的一维链上，Hamiltonian 为
+\begin{equation}
+H = \sum_{i=1}^N \left[\frac12 \pi_i^2 + \frac12 m^2 \phi_i^2\right]
++ \frac12 \sum_{i=1}^{N-1} (\phi_{i+1} - \phi_i)^2
++ \frac{\lambda}{4!} \sum_i \phi_i^4,
+\label{eq:lat-ham}
+\end{equation}
+其中 $\pi_i$ 是与 $\phi_i$ 共轭的动量。
+
+自由部分（$\lambda=0$）通过 Fourier 变换对角化，
+得到 $N$ 个独立的简正模式，频率为
+\begin{equation}
+\omega_k^2 = m^2 + 4g\sin^2\frac{k}{2},
+\qquad k = \frac{2\pi n}{N},\ n=0,1,\ldots,N-1.
+\label{eq:lat-dispersion}
+\end{equation}
+
+相互作用项 $\lambda\phi_i^4/4!$ 耦合了这些模式。
+其一阶基态能量修正为
+\begin{equation}
+\Delta E_0^{(1)} = \frac{\lambda}{4!} \sum_i \langle 0| \phi_i^4 |0\rangle.
+\label{eq:lat-1st}
+\end{equation}
+
+由 Wick 定理，每个格点的四阶期望值分解为
+\begin{equation}
+\langle 0| \phi_i^4 |0\rangle = 3\, \bigl(\langle 0| \phi_i^2 |0\rangle\bigr)^2.
+\label{eq:phi4-wick}
+\end{equation}
+
+而 $\langle 0| \phi_i^2 |0\rangle$ 通过模式展开计算：
+\begin{equation}
+\phi_i = \sum_k U_{ik} X_k,\qquad
+X_k = \frac{1}{\sqrt{2\omega_k}} (a_k + a_k^\dagger),
+\label{eq:mode-expansion}
+\end{equation}
+其中 $U_{ik}$ 是正交变换矩阵。由此得平移不变结果：
+\begin{equation}
+\langle 0| \phi_i^2 |0\rangle = \frac{1}{N} \sum_k \frac{1}{2\omega_k}.
+\label{eq:phi2-vac}
+\end{equation}
+
+代入得解析 tadpole 求和：
+\begin{equation}
+\Delta E_0^{(1)} = \frac{\lambda}{24} N \cdot 3 \left(\frac{1}{N}\sum_k \frac{1}{2\omega_k}\right)^2
+= \frac{\lambda}{8}\frac{1}{N}\left(\sum_k \frac{1}{2\omega_k}\right)^2.
+\label{eq:tadpole-sum}
+\end{equation}
+
+代码 \texttt{06\_phi4\_lattice\_tadpole.py} 实现了上述计算的精确对角化验证。
+它在每个模式 $k$ 的 Fock 空间中截断到 $N_{\text{fock}}$ 维，
+通过张量积构造完整的 $N_{\text{fock}}^N$ 维 Hilbert 空间，
+并显式构建 $\phi_i$ 算符和 $\phi_i^4$ 相互作用矩阵。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{06_phi4_lattice_E0.png}
+\caption{格点 $\phi^4$ 基态能量随 $\lambda$ 的变化（$N=4$ 格点，$m=0.5$）。
+精确对角化（蓝色实线）、一阶微扰（红色虚线）和 tadpole 解析公式（绿色点线）
+在 $\lambda<0.1$ 时吻合很好。}
+\label{fig:phi4-lattice}
+\end{figure}
+
+数值结果确认（$N=4$, $m=0.5$, $\lambda=0.05$）：
+\begin{itemize}[nosep]
+\item 自由基态能量：$E_0^{(0)} = 2.780776$
+\item 一阶微扰修正：$\langle 0|H_1|0\rangle = 0.005695$
+\item 解析 tadpole 公式与数值 $\langle 0|H_1|0\rangle$ 完全一致（误差 $2.6\times10^{-18}$）
+\item 精确基态能量：$E_0 = 2.786442$，一阶微扰误差仅 $3\times10^{-5}$
+\end{itemize}
+
+$N\to\infty$ 连续极限下，模式求和变为动量积分：
+\begin{equation}
+\Delta E_0^{(1)} = \frac{\lambda}{8} \left[\int_{-\pi}^{\pi} \frac{dk}{2\pi} \frac{1}{2\omega_k}\right]^2.
+\label{eq:continuum-tadpole}
+\end{equation}
+
+这正是在 Exercise 01（有限温 tadpole）中计算的 $T=0$ 版本。
+唯一的区别是统计因子：
+\begin{itemize}[nosep]
+\item $T=0$：真空期望值 $\displaystyle\frac{1}{2\omega_k}$（来自 $\langle 0|aa^\dagger|0\rangle$）
+\item $T>0$：热期望值 $\displaystyle\frac{1}{2\omega_k} + \frac{n_B(\omega_k)}{\omega_k}$
+\end{itemize}
+
+\vspace{1em}
+\hrule
+\vspace{0.5em}
+
+从量子力学到场论的路径总结如下：
+
+\begin{enumerate}[nosep]
+\item 算符场 $\hat\phi(x)$ 可以看作「每点一个谐振子」，相邻点的谐振子相互耦合
+\item 动量空间使问题对角化：每个 $k$ 模式是独立谐振子
+\item 粒子 = 场的量子化激发，对应某个 $k$ 模式的 $|0\rangle \to |1\rangle$ 跃迁
+\item 真空有零点涨落 → 传播子 → 粒子可以在虚空中产生和湮灭
+\item 单谐振子的 $\lambda x^4$ 微扰修正 $\to$ $\phi^4$ 场论的 tadpole 图
+\item 格点数值计算验证了从模式求和到 Feynman 图的完整对应
+\item 你已有的 DMRG/MPS 直觉非常有帮助：QFT 的 Fock 空间 =\newline
+$\bigotimes_{\mathbf{k}}$（模式 $\mathbf{k}$ 的 $\mathbb{C}^\infty$）的张量积空间
+\end{enumerate}
 
 \end{document}
