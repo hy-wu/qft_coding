@@ -472,6 +472,105 @@ $N\to\infty$ 连续极限下，模式求和变为动量积分：
 \item $T>0$：热期望值 $\displaystyle\frac{1}{2\omega_k} + \frac{n_B(\omega_k)}{\omega_k}$
 \end{itemize}
 
+\subsection{传播子：两点关联函数}
+
+\label{sec:propagator}
+
+tadpole 图是真空能的修正。但场论中更重要的对象是\textbf{传播子}（propagator）
+——场的两点关联函数。
+
+在格点上，等时传播子定义为
+\begin{equation}
+C_{ij} = \langle 0| \phi_i \phi_j |0\rangle,
+\label{eq:prop-def}
+\end{equation}
+其中 $|0\rangle$ 是精确基态。
+
+\subsubsection*{自由理论}
+
+对于自由理论（$\lambda=0$），基态是 $|0,\ldots,0\rangle$，
+利用模式展开可以直接算出解析形式：
+\begin{equation}
+C_{ij}^0 = \sum_k U_{ik} U_{jk} \, \langle 0| X_k^2 |0\rangle
+= \sum_k U_{ik} U_{jk} \frac{1}{2\omega_k}.
+\label{eq:prop-free}
+\end{equation}
+
+由于平移不变性，$C_{ij}^0$ 只依赖于 $r = |i-j|$。
+在连续极限下，它是熟知的位置空间传播子：
+\begin{equation}
+D(x-y, t=0) = \int \frac{d^3k}{(2\pi)^3} \frac{e^{i\mathbf{k}\cdot(\mathbf{x}-\mathbf{y})}}{2\omega_{\mathbf{k}}}.
+\label{eq:prop-continuum}
+\end{equation}
+
+对于大分离 $r \gg 1/m$，传播子呈指数衰减：
+\begin{equation}
+C(r) \sim e^{-m r},
+\qquad \xi = \frac{1}{m}\ \text{（关联长度）}.
+\label{eq:prop-decay}
+\end{equation}
+
+\subsubsection*{相互作用理论}
+
+加上 $\lambda\phi^4$ 后，基态不再是自由基态。我们需要从精确对角化得到的基态 $|\psi_0\rangle$ 来计算
+
+\begin{equation}
+C_{ij} = \langle\psi_0| \phi_i \phi_j |\psi_0\rangle.
+\label{eq:prop-exact}
+\end{equation}
+
+这会带来两个重要的物理效应：
+\begin{enumerate}[nosep]
+\item \textbf{质量重整化：} 有效质量 $m_{\rm phys}$ 从 $m$ 变为更大的值，
+因为 $\lambda\phi^4$ 相互作用等效于给粒子增加了额外的「恢复力」。
+在微扰论中，这对应 tadpole 对传播子的贡献——self-energy $\Sigma(k)$。
+
+\item \textbf{真空修正：} $\langle\phi_i^2\rangle$ 随 $\lambda$ 减小，
+因为质量增大$\uparrow$ 导致零点涨落减小$\downarrow$。
+\end{enumerate}
+
+代码 \texttt{07\_phi4\_lattice\_propagator.py} 在 $N=8$ 格点上执行了上述计算。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{07_phi4_propagator.png}
+\caption{等时传播子 $C(r) = \langle\phi_i\phi_j\rangle$。
+左图：线性坐标，显示自由与相互作用理论的差别。
+右图：对数坐标，直线斜率对应有效质量——可见相互作用使衰减变快（质量增大）。}
+\label{fig:phi4-prop}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.7\textwidth]{07_mass_renormalization.png}
+\caption{质量重整化：$\lambda$ 增大时 $\langle\phi_i^2\rangle$ 减小，
+对应的有效质量 $m_{\rm screen}$ 增大。这是 $\phi^4$ 相互作用的屏蔽效应。}
+\label{fig:mass-renorm}
+\end{figure}
+
+数值结果（$N=8$, $m=0.5$, $\lambda=0.2$）：
+\begin{itemize}[nosep]
+\item 自由 $\langle\phi_i^2\rangle = 0.440681$
+\item 相互作用 $\langle\phi_i^2\rangle = 0.434843$（$\downarrow 1.3\%$）
+\item 自由基态能量 $E_0^{(0)} = 5.609204$
+\item 精确基态能量 $E_0 = 5.647511$
+\end{itemize}
+
+\subsubsection*{物理意义}
+
+传播子是 QFT 中最重要的对象之一。Feynman 图中的每条\textbf{内线}都代表一个传播子。
+它是场的格林函数，描述了扰动如何在时空中传播。
+
+从格点计算到 Feynman 规则：
+\begin{itemize}[nosep]
+\item 自由传播子 $\displaystyle D_0(k) = \frac{1}{k^2 - m^2 + i\epsilon}$
+对应我们的 $C_{ij}^0$ 的动量空间形式
+\item 相互作用传播子（Dyson 方程）$\displaystyle D(k) = \frac{1}{D_0^{-1}(k) - \Sigma(k)}$
+对应我们的 $C_{ij}$ 包含所有高阶修正
+\item 我们计算的 $\langle\phi_i^2\rangle$ 变化正是 tadpole
+self-energy $\Sigma_{\text{tad}} = \frac{\lambda}{2} \int \frac{d^3k}{(2\pi)^3} \frac{1}{2\omega_k}$ 的零动量极限
+\end{itemize}
+
 \vspace{1em}
 \hrule
 \vspace{0.5em}
@@ -485,6 +584,8 @@ $N\to\infty$ 连续极限下，模式求和变为动量积分：
 \item 真空有零点涨落 → 传播子 → 粒子可以在虚空中产生和湮灭
 \item 单谐振子的 $\lambda x^4$ 微扰修正 $\to$ $\phi^4$ 场论的 tadpole 图
 \item 格点数值计算验证了从模式求和到 Feynman 图的完整对应
+\item 传播子 $C_{ij} = \langle 0|\phi_i\phi_j|0\rangle$ 是场论中最基本的关联函数
+\item 相互作用使质量增大（质量重整化），$\langle\phi_i^2\rangle$ 减小
 \item 你已有的 DMRG/MPS 直觉非常有帮助：QFT 的 Fock 空间 =\newline
 $\bigotimes_{\mathbf{k}}$（模式 $\mathbf{k}$ 的 $\mathbb{C}^\infty$）的张量积空间
 \end{enumerate}
