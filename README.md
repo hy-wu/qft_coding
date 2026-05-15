@@ -1,43 +1,44 @@
-# qft_coding — Finite Temperature QFT with Numerical Computing
+# qft_coding — Learning QFT Through Computation
 
-Learning QFT through computation. From Matsubara sums to spectral functions.
+从谐振子到 Feynman 图，每个概念都有对应的数值验证。
 
-Current exercises:
+**路线：** QHO → 耦合谐振子链（自由场）→ 非谐振子（微扰论）→ 格点 φ⁴（tadpole）→ ...
 
-## 01 — Tadpole & Thermal Mass
+**文档：** `qft_basics.tex`（QFT 基础，简体中文，含完整推导和数值对照）
 
-**Content:** One-loop tadpole self-energy in finite-temperature $\phi^4$ theory.
+详细路线图见 [ROADMAP.md](ROADMAP.md)。
 
-- Matsubara sum performed analytically → numerical momentum integration
-- Verification of high-temperature limit $m_{\rm th}^2 = \lambda T^2 / 24$
-- Plot: $m_{\rm th}^2(T)$ across $T/m_0 \in [0.3, 30]$
+---
 
-**Run:** `python 01_tadpole_thermal_mass.py`
+## 练习列表
 
-## 02 — Spectral Function & Thermal Broadening
+### 基础 QFT（从 QM 出发）
 
-**Content:** Scalar spectral function $\rho(\omega,p)$ at finite $T$ with Breit-Wigner form.
+| File | Topic | Status |
+|------|-------|--------|
+| `04_coupled_qho.py` | 耦合谐振子链 → 色散关系 ω(k) = √(m² + 4g sin²(k/2)) | ✅ |
+| `05_anharmonic_osc.py` | 单非谐振子：精确对角化 vs Rayleigh-Schrödinger 微扰 | ✅ |
+| `06_phi4_lattice_tadpole.py` | 格点 φ⁴：tadpole 模式求和 → Feynman 图 | ✅ |
 
-- Thermal width $\Gamma \sim \lambda^2 T$ from $2\to2$ scattering
-- Three plots: $T$-scan, $p$-scan, peak position/width vs $T$
-- Physics analogue: quarkonium ($J/\psi$, $\Upsilon$) melting in QGP
+### 有限温专题
 
-**Run:** `python 02_spectral_function.py`
+| File | Topic | Status |
+|------|-------|--------|
+| `01_tadpole_thermal_mass.py` | Tadpole & thermal mass m²_th = λT²/24 | ✅ |
+| `02_spectral_function.py` | Spectral function & thermal broadening | ✅ |
+| `03_HTL_plasmon.py` | HTL self-energy & plasmon dispersion | ✅ |
 
-## Roadmap
+---
 
-| # | Topic | Status |
-|---|-------|--------|
-| 1 | Tadpole: thermal mass | ✅ done |
-| 2 | Spectral function | ✅ done |
-| 3 | HTL resummation / heavy quark diffusion | ⏳ next |
+## 使用
 
-## Dependencies
+```bash
+python 06_phi4_lattice_tadpole.py    # 运行格点 φ⁴ 数值验证
+```
 
-- numpy, scipy, matplotlib
+依赖：numpy, scipy, matplotlib
 
-## References
+## 参考
 
+- Peskin & Schroeder, *An Introduction to Quantum Field Theory*
 - Kapusta & Gale, *Finite-Temperature Field Theory*
-- Laine & Vuorinen, *Basics of Thermal Field Theory*
-- Le Bellac, *Thermal Field Theory*
