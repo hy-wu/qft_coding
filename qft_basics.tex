@@ -571,6 +571,95 @@ C_{ij} = \langle\psi_0| \phi_i \phi_j |\psi_0\rangle.
 self-energy $\Sigma_{\text{tad}} = \frac{\lambda}{2} \int \frac{d^3k}{(2\pi)^3} \frac{1}{2\omega_k}$ 的零动量极限
 \end{itemize}
 
+
+\subsection{动量空间传播子与自能}
+
+\label{sec:self-energy}
+
+位置空间的传播子 $C(r)$ 包含了所有模式的信息。
+通过 Fourier 变换到动量空间，我们可以提取每个模式的贡献，
+并直接看到相互作用如何修正传播子。
+
+\subsubsection*{简正模式方法}
+
+利用我们已经构造的简正模式算符 $X_k$，动量空间传播子可以直接计算：
+
+\begin{equation}
+C(k) = \langle \psi_0 | X_k^2 | \psi_0 \rangle,
+\qquad
+C_0(k) = \frac{1}{2\omega_k} \text{（自由理论精确结果）}.
+\label{eq:Ck-direct}
+\end{equation}
+
+这比 Fourier 变换 $C(r)$ 更干净，因为简正模式自动对角化了自由 Hamiltonian，
+且对简并模式不会产生混淆。
+
+\subsubsection*{Dyson 方程与自能}
+
+相互作用传播子 $C(k)$ 与自由传播子 $C_0(k)$ 通过 Dyson 方程联系：
+
+\begin{equation}
+C^{-1}(k) = C_0^{-1}(k) - \Sigma(k),
+\qquad\Longrightarrow\qquad
+\Sigma(k) = 2\omega_k - \frac{1}{C(k)}.
+\label{eq:dyson}
+\end{equation}
+
+$\Sigma(k)$ 是\textbf{自能}（self-energy）——它包含了所有相互作用效应对传播子的修正。
+
+对于 $\phi^4$ 理论，1 圈图的自能来自 tadpole 图插入到传播子中：
+\begin{equation}
+\Sigma_{\text{tad}} = \frac{\lambda}{2} \int \frac{d^3p}{(2\pi)^3} \frac{1}{2\omega_p}
+= \text{常数（与动量无关）}.
+\label{eq:tad-self-energy}
+\end{equation}
+
+这正是我们在 Phase 2.1 中计算的同一个 tadpole！区别只在于：
+\begin{itemize}[nosep]
+\item Phase 2.1：tadpole 作为真空 bubble → 真空能修正
+\item Phase 2.3：tadpole 作为自能插入 → 传播子修正（质量重整化）
+\end{itemize}
+
+代码 \texttt{08\_phi4\_self\_energy.py} 执行了上述计算。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{08_self_energy.png}
+\caption{动量空间传播子与自能。左上：位置空间 $C(r)$（对数坐标）。
+右上：动量空间 $C(k)$，相互作用使传播子压低。
+左下：自能 $\Sigma(k)$ 通过 Dyson 方程提取。
+右下：$\Delta C / C_0$ 百分比，显示相互作用的相对效应。}
+\label{fig:self-energy}
+\end{figure}
+
+典型数值（$N=8$, $m=0.5$, $\lambda=0.3$）：
+\begin{itemize}[nosep]
+\item $k=0$ 时 $C_0(0) = 1.0$，$C(0) = 0.973$（压低 $2.7\%$）
+\item $\Sigma(0) = -0.0275$（负号表示有效质量增大）
+\item 1 圈图预言 $\Sigma(0) \approx -0.1245$，偏差源于 Fock 截断
+\end{itemize}
+
+\subsubsection*{Feynman 图的完整对应}
+
+至此，我们从数值上验证了 $\phi^4$ 场论中 tadpole 图的所有角色：
+
+\begin{center}
+\begin{tabular}{c|c}
+\hline
+\textbf{Feynman 图} & \textbf{数值对应} \
+\hline
+真空 bubble $\bigcirc$ & Phase 2.1：真空能修正 \
+传播子上的 tadpole $\boldsymbol{\cdot\!-\!\!-}$ & Phase 2.3：自能 $\Sigma(k)$ \
+\hline
+\end{tabular}
+\end{center}
+
+在 Feynman 规则中，tadpole 图对应着同一个积分：
+\begin{equation}
+\frac{\lambda}{2} \int \frac{d^3k}{(2\pi)^3} \frac{1}{2\omega_k}
+= \frac{\lambda}{2} \, \langle \phi^2 \rangle_0.
+\label{eq:tadpole-universal}
+\end{equation}
 \vspace{1em}
 \hrule
 \vspace{0.5em}

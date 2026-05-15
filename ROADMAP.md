@@ -38,7 +38,8 @@
 |------|-------|------|--------|
 | 2.0 | 单非谐振子：精确对角化 vs 1阶/2阶 Rayleigh-Schrödinger 微扰 | `05_anharmonic_osc.py` | ✅ |
 | 2.1 | 格点 $\phi^4$：tadpole 的模式求和 → Feynman 图 | `06_phi4_lattice_tadpole.py` | ✅ |
-| 2.2 | 格点传播子：等时两点关联函数 $C_{ij} = \langle 0|\phi_i\phi_j|0\rangle$ 与质量重整化 | `07_phi4_lattice_propagator.py` | ✅ |
+| 2.2 | 格点传播子：等时两点关联函数 $C_{ij} = \langle 0\vert\phi_i\phi_j\vert 0\rangle$ 与质量重整化 | `07_phi4_lattice_propagator.py` | ✅ |
+| 2.3 | 动量空间传播子与自能 $\Sigma(k)$: Dyson 方程, tadpole 自能 | `08_phi4_self_energy.py` | ✅ |
 
 **Phase 2 核心结果：**
 - $\langle 0|x^4|0\rangle = 3/(4\omega^2)$ 是单个谐振子的 tadpole
@@ -69,7 +70,7 @@
 
 ## 文档
 
-- **`qft_basics.tex`** — QFT 基础：从谐振子到场算符、微扰论、格点 $\phi^4$（10 页，简体中文）
+- **`qft_basics.tex`** — QFT 基础：从谐振子到场算符、微扰论、格点 $\phi^4$（14 页，简体中文）
 - **`paper.tex`** — 有限温场论：tadpole、谱函数、HTL（简体中文）
 
 ---
