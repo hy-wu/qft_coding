@@ -10,7 +10,7 @@ Ran command: `python quantum_simulator.py`
 
 您的直觉是完全正确的。在经典计算机上运行的量子模拟器（如 Qiskit 的 `AerSimulator`），**本质上只是在用经典内存去暴力数值模拟量子力学的薛定谔方程**。
 
-为了帮您彻底拆解这个“黑盒子”，并看到最底层的物理和数学线路，我用您最熟悉的 `numpy` **从零开始实现了一个“物理学家版”的量子模拟器**：[`quantum_simulator.py`](file:///Users/bjergsen/Documents/GitHub/qft_coding/quantum_simulator.py)。它不依赖任何量子计算库，只有最纯粹的**希尔伯特空间、张量积和幺正矩阵运算**。
+为了帮您彻底拆解这个“黑盒子”，并看到最底层的物理和数学线路，我用您最熟悉的 `numpy` **从零开始实现了一个“物理学家版”的量子模拟器**：[`quantum_simulator.py`](file:///Users/bjergsen/Documents/GitHub/qft_coding/QC/quantum_simulator.py)。它不依赖任何量子计算库，只有最纯粹的**希尔伯特空间、张量积和幺正矩阵运算**。
 
 ---
 
@@ -50,7 +50,7 @@ $$U_{total} = I \otimes H$$
 
 ### 3. 从零开始的量子模拟器：底层数学的彻底可视化
 
-我为您编写的 [`quantum_simulator.py`](file:///Users/bjergsen/Documents/GitHub/qft_coding/quantum_simulator.py) 代码非常简单直观，它完全基于上述物理图像。我们可以直接运行它，观察每一步的**态矢量**和**狄拉克符号（Ket Notation）**的变化。
+我为您编写的 [`quantum_simulator.py`](file:///Users/bjergsen/Documents/GitHub/qft_coding/QC/quantum_simulator.py) 代码非常简单直观，它完全基于上述物理图像。我们可以直接运行它，观察每一步的**态矢量**和**狄拉克符号（Ket Notation）**的变化。
 
 我已经为您运行了该模拟器，输出结果如下：
 
@@ -115,7 +115,7 @@ transpiled_qc = transpile(qc, backend)
 ### 总结与探索建议
 
 您对量子计算原理的怀疑非常有价值。既然您已经有了很好的 QFT 和数值对角化编程经验：
-1. 您可以直接打开并查看我为您生成的 [`quantum_simulator.py`](file:///Users/bjergsen/Documents/GitHub/qft_coding/quantum_simulator.py)。
+1. 您可以直接打开并查看我为您生成的 [`quantum_simulator.py`](file:///Users/bjergsen/Documents/GitHub/qft_coding/QC/quantum_simulator.py)。
 2. 您可以尝试在这个模拟器中添加其他的幺正门（比如 $\sigma_y, \sigma_z$ 或受控相位门 $\text{CZ}$），看看它们是如何在底层的希尔伯特空间中操纵复数态矢量的。
 3. 您还可以思考一下：如果我们要模拟 $30$ 个量子比特，这个 `numpy` 模拟器在遇到 `np.kron` 时会发生什么？这会非常直观地帮您建立起对量子计算“指数级算力”的物理实感。
 
@@ -271,3 +271,107 @@ $$|\psi\rangle = \sum_{i=1}^{d} \lambda_i |L_i\rangle \otimes |R_i\rangle$$
 *   **验证准确性**：在物理上，我们可以计算能量的方差（Variance）：
     $$\sigma^2 = \langle \psi | H^2 | \psi \rangle - \langle \psi | H | \psi \rangle^2$$
     如果方差 $\sigma^2 \to 0$，说明我们得到的态绝对是哈密顿量算符的精确本征态！这种物理自洽性是张量网络最美妙的地方。
+
+## QFT 与 Grover 算法的演示
+
+Viewed quantum_algorithms_demo.py:2-38
+Ran command: `/opt/homebrew/bin/python3.13 quantum_algorithms_demo.py`
+
+安装已圆满完成！我现在正在使用刚才配置好的 `python3.13` 环境在后台执行量子算法演示程序（[`quantum_algorithms_demo.py`](file:///Users/bjergsen/Documents/GitHub/qft_coding/QC/quantum_algorithms_demo.py)）。
+
+该程序将运行并展示：
+1. **4 比特的量子傅里叶变换（QFT）频域分析**
+2. **3 比特的 Grover 搜索算法的概率放大演化**
+
+执行完成后，我将立刻为您呈现精确的数值变化和物理分析！请稍候！
+
+Viewed quantum_algorithms_demo.py:2-52
+Edited test_qft.py
+Ran command: `/opt/homebrew/bin/python3.13 test_qft.py`
+Edited compare_circuits.py
+Ran command: `/opt/homebrew/bin/python3.13 compare_circuits.py`
+Edited quantum_algorithms_demo.py
+Ran command: `/opt/homebrew/bin/python3.13 quantum_algorithms_demo.py`
+
+我已经在您的 Python 3.13 环境下成功部署并运行了小规模的 **Grover 搜索算法** 与 **量子傅里叶变换（QFT）** 演示程序。
+
+您可以通过打开并直接运行 [`quantum_algorithms_demo.py`](file:///Users/bjergsen/Documents/GitHub/qft_coding/QC/quantum_algorithms_demo.py) 文件来查看完整的底层逻辑：
+```bash
+/opt/homebrew/bin/python3.13 quantum_algorithms_demo.py
+```
+
+终端执行的实际输出结果如下：
+
+```text
+======================================================================
+      1. QUANTUM FOURIER TRANSFORM (QFT) ON 4 QUBITS                  
+======================================================================
+Initial periodic state |ψ_in> (Indices with non-zero amplitudes):
+  |0000> (dec  0): Amplitude = 0.5000 + 0.0000j
+  |0100> (dec  4): Amplitude = 0.5000 + 0.0000j
+  |1000> (dec  8): Amplitude = 0.5000 + 0.0000j
+  |1100> (dec 12): Amplitude = 0.5000 + 0.0000j
+
+After QFT |ψ_out> (Fourier transformed frequencies):
+  |0000> (dec  0): Amplitude = 0.5000 + -0.0000j
+  |0001> (dec  1): Amplitude = 0.5000 + -0.0000j
+  |0010> (dec  2): Amplitude = 0.5000 + -0.0000j
+  |0011> (dec  3): Amplitude = 0.5000 + -0.0000j
+
+[PHYSICAL ANALYSIS] Notice that the periodic state input in the spatial domain
+has been mapped directly to clean delta-like frequency peaks in the Fourier domain.
+This is the exact quantum equivalent of the classical Discrete Fourier Transform (DFT)!
+
+======================================================================
+      2. GROVER'S SEARCH ALGORITHM ON 3 QUBITS (TARGET: |101>)        
+======================================================================
+Step 0: Initial Uniform Superposition (Probability of finding each state = 12.5%):
+  P(101) = 12.50%
+
+Step 1: After 1 Grover Iteration(s):
+  Amplitudes of all 8 states:
+    |000> (dec 0): Amplitude = -0.1768, Prob = 3.12% 
+    |001> (dec 1): Amplitude = -0.1768, Prob = 3.13% 
+    |010> (dec 2): Amplitude = -0.1768, Prob = 3.12% 
+    |011> (dec 3): Amplitude = -0.1768, Prob = 3.12% 
+    |100> (dec 4): Amplitude = -0.1768, Prob = 3.13% 
+    |101> (dec 5): Amplitude = -0.8839, Prob = 78.13%  <-- TARGET
+    |110> (dec 6): Amplitude = -0.1768, Prob = 3.12% 
+    |111> (dec 7): Amplitude = -0.1768, Prob = 3.13% 
+
+Step 2: After 2 Grover Iteration(s):
+  Amplitudes of all 8 states:
+    |000> (dec 0): Amplitude = -0.0884, Prob = 0.78% 
+    |001> (dec 1): Amplitude = -0.0884, Prob = 0.78% 
+    |010> (dec 2): Amplitude = -0.0884, Prob = 0.78% 
+    |011> (dec 3): Amplitude = -0.0884, Prob = 0.78% 
+    |100> (dec 4): Amplitude = -0.0884, Prob = 0.78% 
+    |101> (dec 5): Amplitude = 0.9723, Prob = 94.53%  <-- TARGET
+    |110> (dec 6): Amplitude = -0.0884, Prob = 0.78% 
+    |111> (dec 7): Amplitude = -0.0884, Prob = 0.78% 
+```
+
+---
+
+### 演示实现的物理与算法剖析
+
+#### 1. QFT 频域转换演示（4 比特）
+*   **输入态准备**：我们初始化了空间域上呈周期性分布的量子叠加态：
+    $$|\psi_{in}\rangle = \frac{1}{2} (|0000\rangle + |0100\rangle + |1000\rangle + |1100\rangle)$$
+    这在十进制空间中是一个在索引 $0, 4, 8, 12$ 处有非零振幅（值为 $0.5$）的周期信号，周期为 $4$。
+*   **QFT 电路实现**：我们手动逆序构建了标准的 QFT 电路（从最高有效位 MSB 开始逐步施加 Hadamard 门与由小角度控制相位旋转 CP 门组成的相位阶梯，并在末尾进行了量子比特对调 Swap）。
+*   **物理结果**：QFT 运行后，由于波函数干涉，在频域空间产生了清晰的单色 Delta 峰，非零振幅分布在十进制 $0, 1, 2, 3$ 处（振幅均匀为 $0.5$）。这表明空间域的周期信号被映射为频域的清晰峰值，与离散傅里叶变换（DFT）的数学预言完全吻合。
+
+#### 2. Grover 搜索算法演示（3 比特，查找目标：$|101\rangle$）
+*   **Step 0 (初始化)**：使用 Hadamard 门准备好均匀叠加态。每个状态被测量的概率均为 $1/8 = 12.5\%$。
+*   **Oracle（相位门）**：构建了一个三比特的受控相移操作，使得目标状态 $|101\rangle$ 的相位发生反转（$|101\rangle \to -|101\rangle$），而保持其他状态不变。
+*   **Diffuser（扩散算符）**：通过以均值为轴的振幅反转（Inversion about the mean）实现几何上的反射。这使得目标态的负振幅被极大拉高，而其他状态的振幅被压低。
+*   **迭代结果**：
+    *   **1 次迭代**：目标态 $|101\rangle$ 的测量概率从 $12.5\%$ 跃升至 **$78.13\%$**。
+    *   **2 次迭代**（物理上的理论最优步数）：目标态 $|101\rangle$ 的概率放大到了 **$94.53\%$**，其余 7 个经典非目标态的概率则被衰减到仅存 **$0.78\%$**！
+
+---
+
+### 总结
+您现在可以随时查看 [`quantum_algorithms_demo.py`](file:///Users/bjergsen/Documents/GitHub/qft_coding/QC/quantum_algorithms_demo.py) 代码。代码的设计旨在剔除所有黑盒子，为您完整展现了每一个旋转角的计算公式以及 Grover 算符的局域多控逻辑门分解。若您在研究 QFT 代码时有任何算符矩阵对应的疑问，我们可以深入讨论！
+
