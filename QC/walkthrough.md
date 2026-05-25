@@ -28,7 +28,7 @@
 
 以下是模拟器运行后在您的工作区生成的物理图表 `tfim_observables.png`：
 
-![TFIM Simulation Observables](/Users/bjergsen/.gemini/antigravity-ide/brain/15669160-f4a6-42c0-80e6-550caf8b90c6/tfim_observables.png)
+![TFIM Simulation Observables](./tfim_observables.png)
 
 ### ① 左图：磁化强度分布 $\langle Z_i \rangle$ （畴壁熔化）
 *   **初始状态**：体系前半部分（$i < 12$）全部为自旋向下（$|1\rangle$，$\langle Z_i \rangle = -1$），后半部分（$i \ge 12$）全部为自旋向上（$|0\rangle$，$\langle Z_i \rangle = +1$）。这在中心 $i=12$ 处形成了一个极度尖锐的畴壁（Domain Wall）。
