@@ -6,3 +6,5 @@ Thumbs.db
 *.log
 *.out
 *.synctex.gz
+
+build
