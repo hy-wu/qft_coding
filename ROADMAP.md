@@ -52,9 +52,13 @@
 
 | Step | Topic | Code | Status |
 |------|-------|------|--------|
-| 3.0 | LSZ 约化公式与 $S$ 矩阵 | — | 📋 planned |
-| 3.1 | $\phi^4$ 的 $2\to2$ 散射：树图截面 | — | 📋 planned |
-| 3.2 | 单圈修正：$s$, $t$, $u$ 通道 | — | 📋 planned |
+| 3.0 | LSZ 约化公式与 $S$ 矩阵 | `feynman_diagrams.md` §1,6,8 | 📚 理论已就绪 |
+| 3.1 | $\phi^4$ 的 $2\to2$ 散射：树图截面 | `feynman_diagrams.md` §9 | 📚 理论已就绪 |
+| 3.2 | 单圈修正：$s$, $t$, $u$ 通道 | `feynman_diagrams.md` §9,11 | 📚 理论已就绪 |
+
+> 理论参考：**`feynman_diagrams.md`** —— 从 Dyson 级数、Wick 定理到 Feynman 规则、
+> 对称因子、LSZ、$\phi^4$/QED 树图截面、单圈正则化与重整化，含与 Phase 0--2
+> 所用约定的换算表（附录 A）。
 
 ---
 
@@ -72,6 +76,8 @@
 
 - **`qft_basics.tex`** — QFT 基础：从谐振子到场算符、微扰论、格点 $\phi^4$（14 页，简体中文）
 - **`paper.tex`** — 有限温场论：tadpole、谱函数、HTL（简体中文）
+- **`feynman_diagrams.md`** — 费曼图：Dyson 级数 → Wick 定理 → 规则 → 对称因子 → LSZ/截面
+  → 圈图重整化（简体中文，含约定换算表）
 
 ---
 

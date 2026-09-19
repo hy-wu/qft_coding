@@ -8,3 +8,5 @@ Thumbs.db
 *.synctex.gz
 
 build
+
+.opencode/
